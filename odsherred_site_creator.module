@@ -1,0 +1,25 @@
+<?php
+
+function odsherred_site_creator_menu() {
+  $items = array();
+  $items['admin/odsherred/sites'] = array(
+    'title' => 'Odsherred site creators overview',
+    'access callback' => TRUE,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('odsherred_site_creator_form'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function odsherred_site_creator_form() {
+  $form = array(
+    'title' => array(
+      '#type' => 'textfield',
+    ),
+    'submit' => array(
+      '#type' => 'submit',
+    ),
+  );
+  return $form;
+}
