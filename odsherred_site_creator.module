@@ -5,22 +5,32 @@
  */
 
 /**
+ * Implementation of hook_perm()
+ */
+function odsherred_site_creator_perm() {
+  return array('use odsherred stie creator');
+}
+
+/**
  * Implements hook_menu().
  */
 function odsherred_site_creator_menu() {
   $items = array();
-  $items['admin/odsherred'] = array(
-    'title' => 'Odsherred site creator',
-    'access callback' => TRUE,
-    'page callback' => 'drupal_goto',
-    'page arguments' => array('admin/odsherred/sites'),
+  $items['admin/config/odsherred'] = array(
+    'title' => 'Odsherred settings',
+    'description' => 'Site creator and other settings for Odsherred',
+    'position' => 'right',
+    'weight' => -10,
+    'page callback' => 'system_admin_menu_block_page',
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+    'access arguments' => array('use odsherred stie creator'),
   );
-  $items['admin/odsherred/sites'] = array(
+  $items['admin/config/odsherred/sitecreate'] = array(
     'title' => 'Odsherred site creators overview',
-    'access callback' => TRUE,
+    'access arguments' => array('use odsherred stie creator'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('odsherred_site_creator_form'),
-    'type' => MENU_DEFAULT_TASK | MENU_NORMAL_ITEM,
   );
   return $items;
 }
