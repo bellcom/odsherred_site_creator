@@ -8,7 +8,7 @@
  * Implementation of hook_perm()
  */
 function odsherred_site_creator_perm() {
-  return array('use odsherred stie creator');
+  return array('use odsherred site creator');
 }
 
 /**
@@ -24,11 +24,11 @@ function odsherred_site_creator_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
-    'access arguments' => array('use odsherred stie creator'),
+    'access arguments' => array('use odsherred site creator'),
   );
   $items['admin/config/odsherred/sitecreate'] = array(
-    'title' => 'Odsherred site creators overview',
-    'access arguments' => array('use odsherred stie creator'),
+    'title' => 'Odsherred site creator',
+    'access arguments' => array('use odsherred site creator'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('odsherred_site_creator_form'),
   );
