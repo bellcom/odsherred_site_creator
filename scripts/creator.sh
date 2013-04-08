@@ -9,16 +9,13 @@ QUEUE_DIR="${BASE_DIR}/queue"
 COMPLETE_DIR="${BASE_DIR}/complete"
 FAILED_DIR="${BASE_DIR}/failed"
 
+RUNNINGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MULTISITE="/var/www/subsites.odsherred.dk/public_html"
 DBDIR="/var/lib/mysql"
-DBROOTPW=`cat .mysqlpasswd`
+DBROOTPW=`cat $RUNNINGDIR/.mysqlpasswd`
 VHOST="/etc/apache2/sites-enabled/subsites.odsherred.dk"
 SITESFILE="$MULTISITE/sites/sites.php"
 SERVERIP="192.168.2.227"
-
-echo $DBROOTPW
-
-exit
 
 function addVhostAlias () {
   if [ -z "$1" ]
