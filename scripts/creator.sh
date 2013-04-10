@@ -11,6 +11,7 @@ FAILED_DIR="${BASE_DIR}/failed"
 
 RUNNINGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MULTISITE="/var/www/subsites.odsherred.dk/public_html"
+TMPDIRBASE="/var/www/subsites.odsherred.dk/tmp"
 DBDIR="/var/lib/mysql"
 DBROOTPW=`cat $RUNNINGDIR/.mysqlpasswd`
 VHOST="/etc/apache2/sites-enabled/subsites.odsherred.dk"
@@ -32,6 +33,7 @@ fi
 for i in `ls $QUEUE_DIR/*`; do
   source $i
   SITENAMETRIMMED=`echo $SITENAME | tr -d ' '`
+  TMPDIR="$TMPDIRBASE/$SITENAMETRIMMED"
   DBNAME=`echo $SITENAMETRIMMED |  sed 's/\./_/g'`
   DBUSER=`echo $DBNAME | cut -c 1-16`
   DBPASS=`pwgen -s 10 1`
@@ -92,20 +94,27 @@ for i in `ls $QUEUE_DIR/*`; do
 # reload apache
   /etc/init.d/apache2 reload &> /dev/null
 
+# Create tmpdir
+  mkdir $TMPDIR
+
 # Do a drush site install
   /usr/bin/drush -q -y -r $MULTISITE site-install $PROFILE --db-url="mysql://$DBUSER:$DBPASS@localhost/$DBNAME" --sites-subdir=$SITENAMETRIMMED --account-mail=$EMAIL --site-mail=$EMAIL --site-name=$SITENAMETRIMMED --account-pass=$ADMINPASS
+
+# Set tmp
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED vset file_temporary_path $TMPDIR
+
+# Do some drupal setup here. Don't trust the profile :)
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED dis update comment
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED vset user_register 0
 
 # add to crontab
   CRONKEY=`/usr/bin/drush -r $MULTISITE --uri=$SITENAMETRIMMED vget cron_key | cut -d \" -f 2`
   CRONLINE="30 * * * * wget -O - -q -t 1 http://$SITENAMETRIMMED/cron.php?cron_key=$CRONKEY"
   (/usr/bin/crontab -u www-data -l; echo "$CRONLINE") | /usr/bin/crontab -u www-data -
 
-# Do other stuff with drush that isnt done in the profile? Enable cache?
-  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED dis update
-
 # Set correct permissions
-  /bin/chgrp -R www-data $MULTISITE/sites/$SITENAMETRIMMED
-  /bin/chmod -R g+rwX $MULTISITE/sites/$SITENAMETRIMMED
+  /bin/chgrp -R www-data $MULTISITE/sites/$SITENAMETRIMMED $TMPDIR
+  /bin/chmod -R g+rwX $MULTISITE/sites/$SITENAMETRIMMED $TMPDIR
 
 # Move file to completed
   mv $i $COMPLETE_DIR
