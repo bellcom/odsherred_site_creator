@@ -7,8 +7,12 @@
 /**
  * Implementation of hook_perm()
  */
-function odsherred_site_creator_perm() {
-  return array('use odsherred site creator');
+function odsherred_site_creator_permission() {
+  return array('use odsherred site creator' => array(
+   'title' => t('Use odsherred site creator'),
+   'description' => t('Create new subsites on odsherred')
+   )
+  );
 }
 
 /**
@@ -73,17 +77,19 @@ function odsherred_site_creator_form_submit($form, &$form_state) {
   if (file_prepare_directory($queue, FILE_CREATE_DIRECTORY || FILE_MODIFY_PERMISSIONS) &&
       file_prepare_directory($complete, FILE_CREATE_DIRECTORY || FILE_MODIFY_PERMISSIONS) &&
       file_prepare_directory($failed, FILE_CREATE_DIRECTORY || FILE_MODIFY_PERMISSIONS)) {
+        
+    $password = user_password();
+
     $data = "TITLE=\"" . $form_state['values']['title'] . "\"\n";
     $data .= "SITENAME=\"" . $form_state['values']['url'] . "\"\n";
     $data .= "URL=\"" . $form_state['values']['url'] . "\"\n";
     $data .= "PROFILE=\"odsherred_subsite\"\n";
     $data .= "EMAIL=\"" . $form_state['values']['mail'] . "\"\n";
+    $data .= "ADMINPASS=\"" . $password . "\"\n";
 
-    if (file_unmanaged_save_data($data, $queue . '/' . uniqid() . '.txt')) {
-      $sites = variable_get('odsherred_site_creator_sites');
-        error_log(__FILE__.':'.__LINE__. print_r($sites, 1)); // tth@bellcom.dk debugging
-      variable_set('odsherred_site_creator_sites', $sites);
-      drupal_set_message(t('Site @name queue for creation.', array('@name' => $form_state['values']['title'])), 'status');
+    $uniqid = uniqid();
+    if (file_unmanaged_save_data($data, $queue . '/' . $uniqid . '.txt')) {
+      drupal_set_message(t('Site @name ( @url )queue for creation. Here are your credentials:', array('@name' => $form_state['values']['title'], '@url' => $form_state['values']['url'])) .'<br />'. t('username: ') . 'admin <br />' . t('password: ') . $password, 'status');
     }
     else {
       drupal_set_message('Failed to write file. Check temporary directory setup.', 'error');

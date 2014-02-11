@@ -13,8 +13,7 @@ RUNNINGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MULTISITE="/var/www/subsites.odsherred.dk/public_html"
 TMPDIRBASE="/var/www/subsites.odsherred.dk/tmp"
 DBDIR="/var/lib/mysql"
-DBROOTPW=`cat $RUNNINGDIR/.mysqlpasswd`
-VHOST="/etc/apache2/sites-enabled/subsites.odsherred.dk"
+VHOST="/etc/apache2/sites-available/subsites.odsherred.dk"
 SITESFILE="$MULTISITE/sites/sites.php"
 SERVERIP="192.168.2.227"
 
@@ -22,6 +21,7 @@ function addVhostAlias () {
   if [ -z "$1" ]
   then
     echo "FAILED. Empty or no name passed to addVhostAlias"
+    exit
   fi
   /usr/bin/perl -p -i -e "s/ServerName subsites.odsherred.dk/ServerName subsites.odsherred.dk\n    ServerAlias $1/g" $VHOST
 }
@@ -66,8 +66,8 @@ for i in `ls $QUEUE_DIR/*`; do
   fi
 
 # Create database and database user
-  /usr/bin/mysql -u root --password="$DBROOTPW" -e "CREATE DATABASE $DBNAME;"
-  /usr/bin/mysql -u root --password="$DBROOTPW" -e "GRANT ALL ON $DBNAME.* TO $DBUSER@localhost IDENTIFIED BY \"$DBPASS\"";
+  /usr/bin/mysql -u root -e "CREATE DATABASE $DBNAME;"
+  /usr/bin/mysql -u root -e "GRANT ALL ON $DBNAME.* TO $DBUSER@localhost IDENTIFIED BY \"$DBPASS\"";
 
 # Add to vhost
   addVhostAlias $SITENAME
@@ -107,6 +107,13 @@ for i in `ls $QUEUE_DIR/*`; do
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED dis update comment
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED vset user_register 0
 
+# Enable and update translations. This is disabled during install.
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED en l10n_update
+#  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED langadd da
+#  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED language-default da
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update-refresh
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update
+
 # add to crontab
   CRONKEY=`/usr/bin/drush -r $MULTISITE --uri=$SITENAMETRIMMED vget cron_key | cut -d \" -f 2`
   CRONLINE="30 * * * * wget -O - -q -t 1 http://$SITENAMETRIMMED/cron.php?cron_key=$CRONKEY"
@@ -115,6 +122,7 @@ for i in `ls $QUEUE_DIR/*`; do
 # Set correct permissions
   /bin/chgrp -R www-data $MULTISITE/sites/$SITENAMETRIMMED $TMPDIR
   /bin/chmod -R g+rwX $MULTISITE/sites/$SITENAMETRIMMED $TMPDIR
+  /bin/chmod g-w $MULTISITE/sites/$SITENAMETRIMMED $MULTISITE/sites/$SITENAMETRIMMED/settings.php
 
 # Move file to completed
   mv $i $COMPLETE_DIR
