@@ -1,5 +1,5 @@
-name = Odsherred site creation moduler
+name = Site creation moduler
 description = Allows certain users to create new subsites. Depends on a server script that needs to run in cron.
 
-package = Odsherred
+;package = Odsherred
 core = 7.x

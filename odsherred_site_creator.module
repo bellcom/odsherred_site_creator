@@ -8,9 +8,9 @@
  * Implementation of hook_perm()
  */
 function odsherred_site_creator_permission() {
-  return array('use odsherred site creator' => array(
-   'title' => t('Use odsherred site creator'),
-   'description' => t('Create new subsites on odsherred')
+  return array('use site creator' => array(
+   'title' => t('Use site creator'),
+   'description' => t('Create new subsites')
    )
   );
 }
@@ -20,19 +20,19 @@ function odsherred_site_creator_permission() {
  */
 function odsherred_site_creator_menu() {
   $items = array();
-  $items['admin/config/odsherred'] = array(
-    'title' => 'Odsherred settings',
-    'description' => 'Site creator and other settings for Odsherred',
+  $items['admin/config/subsites'] = array(
+    'title' => 'Create subsites settings',
+    'description' => 'Site creator and other settings',
     'position' => 'right',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
-    'access arguments' => array('use odsherred site creator'),
+    'access arguments' => array('use site creator'),
   );
-  $items['admin/config/odsherred/sitecreate'] = array(
-    'title' => 'Odsherred site creator',
-    'access arguments' => array('use odsherred site creator'),
+  $items['admin/config/subsites/sitecreate'] = array(
+    'title' => 'Site creator',
+    'access arguments' => array('use site creator'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('odsherred_site_creator_form'),
   );
