@@ -42,6 +42,11 @@ function odsherred_site_creator_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('odsherred_site_creator_form'),
   );
+  $items['subsite/%/%'] = array(
+    'page callback' => 'odsherred_site_creator_data_page',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+  );
   return $items;
 }
 
@@ -96,6 +101,34 @@ function odsherred_site_creator_node_validate($node, $form, &$form_state) {
       }
     }
   }
+}
+
+/**
+ * Return data for subsite.
+ */
+function odsherred_site_creator_data_page($site_name, $key) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'subsite')
+    ->fieldCondition('field_domains', 'value', $site_name);
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $node = node_load(key($result['node']));
+  }
+  if ($node && _odsherred_site_creator_valid_subsite($node, $key)) {
+    drupal_json_output($node);
+  }
+}
+
+/**
+ * Validate the subsite for fetching subsite data.
+ */
+function _odsherred_site_creator_valid_subsite($node, $key) {
+  if ($field = field_get_items('node', $node, 'field_admin_mail')) {
+    return $key == md5($field[0]['value']);
+  }
+  return FALSE; 
 }
 
 /**
