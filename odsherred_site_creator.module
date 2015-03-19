@@ -1,6 +1,12 @@
 <?php
 /**
  * @file
+ * Code for the Site creation moduler feature.
+ */
+
+include_once 'odsherred_site_creator.features.inc';
+/**
+ * @file
  * This is the module file containing the logic for the creator.
  */
 
@@ -37,6 +43,84 @@ function odsherred_site_creator_menu() {
     'page arguments' => array('odsherred_site_creator_form'),
   );
   return $items;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function odsherred_site_creator_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'subsite_node_form') {
+    // Site title cannot be altered.
+    if ($form['#node']->title) {
+      $form['title']['#disabled'] = TRUE;
+    }
+
+    // Suffix domain to form.
+    $domain_suffix = variable_get('bc_subsites_domain_suffix');
+    $form['title']['#field_suffix'] = $domain_suffix;
+
+    // Hide unwanted form stuff.
+    $form['comment_settings']['#access'] = FALSE;
+    $form['revision_information']['#access'] = FALSE;
+    $form['additional_settings']['#access'] = FALSE;
+    $form['path']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Validate subsite node form.
+ */
+function odsherred_site_creator_node_validate($node, $form, &$form_state) {
+  if ($node->type == 'subsite') {
+    // Validate e-mail address.
+    if (!valid_email_address($form_state['values']['field_admin_mail'][LANGUAGE_NONE][0]['value'])) {
+      form_set_error('field_admin_mail', t('Du skal indtaste en gyldig e-mail adresse'));
+    }
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'subsite')
+      ->propertyCondition('title', $node->title);
+    $result = $query->execute();
+
+    if (!empty($result['node']) && !$node->nid) {
+      form_set_error('title', 'Det indtastede navn er allerede i brug.');
+    }
+
+    // Validate subsite addresses.
+    foreach ($form_state['values']['field_domains'][LANGUAGE_NONE] as $delta => $value) {
+      if (is_numeric($delta)) {
+        if ($value['value'] && !_bc_subsites_is_valid_domain_name($value['value'])) {
+          form_set_error('field_domains][' . LANGUAGE_NONE . '][' . $delta, 'Det indtastede domæne er ikke gyldigt.');
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function odsherred_site_creator_node_presave($node) {
+  $sitename = $node->title;
+  $domains = array();
+
+  $field = field_get_items('node', $node, 'field_domains');
+  foreach ($field as $delta => $value) {
+    $domains[] = $value['value'];
+  }
+
+  $field = field_get_items('node', $node, 'field_admin_mail');
+  $email = $field[0]['value'];
+
+  // Create the site.
+  if ($node->is_new) {
+    $form_state['values']['title'] = $sitename;
+    $form_state['values']['url'] = $domains[0];
+    $form_state['values']['mail'] = $email;
+
+    odsherred_site_creator_form_submit(array(), $form_state);
+  }
 }
 
 /**
@@ -98,4 +182,18 @@ function odsherred_site_creator_form_submit($form, &$form_state) {
   else {
     drupal_set_message('Failed to create site!, check public files directory.', 'error');
   }
+}
+
+/**
+ * Validate domain name.
+ */
+function _bc_subsites_is_valid_domain_name($domain_name) {
+  if (strpos($domain_name, '.') === FALSE) {
+    return FALSE;
+  }
+
+  // http://stackoverflow.com/questions/1755144/how-to-validate-domain-name-in-php
+  return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $domain_name)
+          && preg_match("/^.{1,253}$/", $domain_name)
+          && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domain_name));
 }
