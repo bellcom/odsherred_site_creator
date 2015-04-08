@@ -126,7 +126,47 @@ function odsherred_site_creator_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 8,
+      'weight' => 9,
+    ),
+  );
+
+  // Exported field_instance: 'node-subsite-field_fritekst'
+  $field_instances['node-subsite-field_fritekst'] = array(
+    'bundle' => 'subsite',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 12,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_fritekst',
+    'label' => 'Fritekst',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 12,
     ),
   );
 
@@ -170,6 +210,46 @@ function odsherred_site_creator_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-subsite-field_kontakt_by'
+  $field_instances['node-subsite-field_kontakt_by'] = array(
+    'bundle' => 'subsite',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 11,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_kontakt_by',
+    'label' => 'Kontakt - By',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 6,
+    ),
+  );
+
   // Exported field_instance: 'node-subsite-field_kontakt_e_mail'
   $field_instances['node-subsite-field_kontakt_e_mail'] = array(
     'bundle' => 'subsite',
@@ -206,7 +286,7 @@ function odsherred_site_creator_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 7,
+      'weight' => 8,
     ),
   );
 
@@ -326,7 +406,7 @@ function odsherred_site_creator_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 6,
+      'weight' => 7,
     ),
   );
 
@@ -366,7 +446,7 @@ function odsherred_site_creator_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 9,
+      'weight' => 10,
     ),
   );
 
@@ -406,7 +486,7 @@ function odsherred_site_creator_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 10,
+      'weight' => 11,
     ),
   );
 
@@ -414,7 +494,9 @@ function odsherred_site_creator_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Admin e-mail');
   t('Facebook');
+  t('Fritekst');
   t('Kontakt - Adresse');
+  t('Kontakt - By');
   t('Kontakt - E-mail');
   t('Kontakt - Navn');
   t('Kontakt - Postnummer');
