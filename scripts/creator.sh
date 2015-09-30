@@ -7,6 +7,7 @@ BASE_DIR="/var/www/subsites.odsherred.dk/subsites-creator"
 
 QUEUE_DIR="${BASE_DIR}/queue"
 COMPLETE_DIR="${BASE_DIR}/complete"
+PROCESSING_DIR="${BASE_DIR}/processing"
 FAILED_DIR="${BASE_DIR}/failed"
 
 RUNNINGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -65,6 +66,9 @@ for i in `ls $QUEUE_DIR/*`; do
     exit
   fi
 
+# move to processing dir to avoid multiple runs
+  mv $i $PROCESSING_DIR
+
 # Create database and database user
   /usr/bin/mysql -u root -e "CREATE DATABASE $DBNAME;"
   /usr/bin/mysql -u root -e "GRANT ALL ON $DBNAME.* TO $DBUSER@localhost IDENTIFIED BY \"$DBPASS\"";
@@ -114,6 +118,9 @@ for i in `ls $QUEUE_DIR/*`; do
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update-refresh
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update
 
+  # Enforce features
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED fr -y --force subsite_grundindstillinger
+
 # add to crontab
   CRONKEY=`/usr/bin/drush -r $MULTISITE --uri=$SITENAMETRIMMED vget cron_key | cut -d \" -f 2`
   CRONLINE="30 * * * * wget -O - -q -t 1 http://$SITENAMETRIMMED/cron.php?cron_key=$CRONKEY"
@@ -125,7 +132,8 @@ for i in `ls $QUEUE_DIR/*`; do
   /bin/chmod g-w $MULTISITE/sites/$SITENAMETRIMMED $MULTISITE/sites/$SITENAMETRIMMED/settings.php
 
 # Move file to completed
-  mv $i $COMPLETE_DIR
+  PROCESSING_FILE=$(basename $i)
+  mv $PROCESSING_DIR/$PROCESSING_FILE $COMPLETE_DIR
 
 # add admin info to the file in completed
   echo "Subsite created $NOW" >> $COMPLETE_DIR/`basename $i`
