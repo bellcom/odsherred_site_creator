@@ -111,15 +111,17 @@ for i in `ls $QUEUE_DIR/*`; do
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED dis update comment
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED vset user_register 0
 
+  # Enforce features
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED fr -y --force subsite_grundindstillinger
+  # Enable reservation calender
+  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED en od_music_agreservation
+
 # Enable and update translations. This is disabled during install.
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED en l10n_update
 #  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED langadd da
 #  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED language-default da
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update-refresh
   /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED l10n-update
-
-  # Enforce features
-  /usr/bin/drush -q -y -r $MULTISITE --uri=$SITENAMETRIMMED fr -y --force subsite_grundindstillinger
 
 # add to crontab
   CRONKEY=`/usr/bin/drush -r $MULTISITE --uri=$SITENAMETRIMMED vget cron_key | cut -d \" -f 2`
